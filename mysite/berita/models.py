@@ -3,6 +3,10 @@ import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
+
+from ckeditor.fields import RichTextField
+from ckeditor_uploader.fields import RichTextUploadingField
+
 # Create your models here.
 
 x = datetime.datetime.now()
@@ -18,7 +22,18 @@ class Katagori(models.Model):
 
 class Artikel(models.Model):
     judul = models.CharField(max_length= 100)
-    isi = models.TextField(blank=True, null=True)
+    isi = RichTextUploadingField (
+        config_name='special',
+        external_plugin_resources=[(
+            'youtube',
+            'https://minio.umkt.ac.id/simpelv2-static/ckeditor_plugins/youtube/youtube/',
+            #'http://localhost:8000/static/ckeditor_plugins/youtube/youtube/',
+            'plugin.js',
+            )],
+            blank=True,
+            null=True
+            )
+    # isi = models.TextField(blank=True, null=True)
     kategori = models.ForeignKey(Katagori, on_delete=models.SET_NULL,blank=True , null=True)
     author = models.ForeignKey(User, on_delete=models.PROTECT, blank=True ,null= True)
     thumbnail = models.ImageField(upload_to='artikel',blank=True, null=True)

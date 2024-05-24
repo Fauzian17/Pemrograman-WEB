@@ -1,4 +1,4 @@
-{% extends 'dasboard/base.html' %} {% block content %}
+{% extends 'dasboard/base.html' %} {% load static %} {% block content %}
 <div class="content">
   <div class="row">
     <div class="col-md-12">
@@ -47,4 +47,7 @@
     </div>
   </div>
 </div>
-{% endblock content %}
+{% endblock content %} {% block js %}
+<script type="text/javascript" src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+<script type="text/javascript" src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+{% endblock %}

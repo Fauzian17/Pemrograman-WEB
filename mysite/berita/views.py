@@ -1,8 +1,16 @@
 from django.shortcuts import render,redirect
+from django.contrib.auth.decorators import login_required,user_passes_test
+
 from berita.models import Katagori,Informasi,Artikel
 from berita.forms import ArtikelForm
 
-# Create your views here.
+def is_operator(user):
+    if user.groups.filter(name='Operator').exists():
+        return True
+    else:
+        return False
+
+@login_required
 def dasboard(request):
     template_name = "dasboard/index.html"
     context = {
@@ -11,6 +19,8 @@ def dasboard(request):
 
     return render(request,template_name,context)
 
+@login_required
+@user_passes_test(is_operator, login_url='/authentifikasi/logout')
 def katagori_ls(request):
     template_name = "dasboard/snippets/katagori_ls.html"
     katagori= Katagori.objects.all()
@@ -22,6 +32,8 @@ def katagori_ls(request):
 
     return render(request,template_name,context)
 
+@login_required
+@user_passes_test(is_operator, login_url='/authentifikasi/logout')
 def kategori_add(request):
     template_name = "dasboard/snippets/kategori_add.html"
     if request.method == "POST":
@@ -35,6 +47,8 @@ def kategori_add(request):
     }
     return render(request,template_name,context)
 
+@login_required
+@user_passes_test(is_operator, login_url='/authentifikasi/logout')
 def kategori_update(request, id_katagori):
     template_name = "dasboard/snippets/kategori_update.html"
     try:
@@ -59,16 +73,22 @@ def kategori_delete(request, id_katagori):
         pass
     return redirect(katagori_ls)
 
+@login_required
 def artikel_list(request):
     template_name = "dasboard/snippets/artikel_list.html"
-    artikel = Artikel.objects.all()
-    print(artikel)
+
+    if request.user.groups.filter(name='Operator'):
+        artikel = Artikel.objects.all()
+    else:
+        artikel = Artikel.objects.filter(author=request.user)
+
     context = {
         'title' : 'daftar artikel',
         'artikel' : artikel
     }
     return render(request,template_name,context)
 
+@login_required
 def artikel_add(request):
     print(request.user)
     template_name ="dasboard/snippets/artikel_forms.html"
@@ -88,6 +108,7 @@ def artikel_add(request):
     }
     return render(request,template_name,context)
 
+@login_required
 def artikel_detail(request, id_artikel):
     template_name = "dasboard/snippets/artikel_detail.html"
     artikel = Artikel.objects.get(id=id_artikel)
@@ -97,9 +118,17 @@ def artikel_detail(request, id_artikel):
     }
     return render(request,template_name,context)
 
+@login_required
 def artikel_update(request, id_artikel):
     template_name = "dasboard/snippets/artikel_forms.html"
     artikel = Artikel.objects.get(id=id_artikel)
+
+    if request.user.groups.filter(name='Operator'):
+        pass
+    else:
+        if artikel.author != request.user:
+            return redirect('/')
+
     if request.method == "POST":
         forms = ArtikelForm(request.POST, request.FILES, instance=artikel)
         if forms.is_valid:
@@ -114,9 +143,17 @@ def artikel_update(request, id_artikel):
     }
     return render(request,template_name,context)
 
+@login_required
 def artikel_delete(request, id_artikel):
     try:
-        Artikel.objects.get(id=id_artikel).delete()
+        artikel = Artikel.objects.get(id=id_artikel)
+        if request.user.groups.filter(name='Operator'):
+            pass
+        else:
+            if artikel.author != request.user:
+                return redirect('/')
+            artikel.delete()
+            
     except:
         pass
     return redirect(artikel_list)

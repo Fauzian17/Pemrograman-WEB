@@ -7,7 +7,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from mysite.views import home,about,detail_artikel,contact
-from mysite.authentifikasi import akun_login,akun_registrasi
+from mysite.authentifikasi import akun_login,akun_registrasi,akun_logout
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -20,6 +20,9 @@ urlpatterns = [
 
     path('authentifikasi/login',akun_login, name="akun_login"),
     path('authentifikasi/regitrasi',akun_registrasi, name="akun_registrasi"),
+    path('authentifikasi/logout',akun_logout, name="akun_logout"),
+
+    path('ckeditor/',include('ckeditor_uploader.urls')),
 ]
 
 if settings.DEBUG: 
